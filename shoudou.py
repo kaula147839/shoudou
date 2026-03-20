@@ -2,11 +2,13 @@ import pygame
 import random
 
 # 宣告遊戲視窗長寬
-WIDTH = 500
+WIDTH = 490
 HEIGHT = 600
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+BLUE = (0, 0, 255)
+RED = (255, 0, 0)
 
 # 遊戲初始化
 pygame.init()
@@ -15,13 +17,23 @@ pygame.display.set_caption("數獨")
 
 # 列出文字
 font_name = pygame.font.match_font('arial')
-def draw_text(surf, text, size, x, y):
+def draw_text(surf, text, size, x, y,color):
     font = pygame.font.Font(font_name, size)
-    text_surface = font.render(text, True, (0, 0, 0))
+    text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect()
     text_rect.centerx = x
     text_rect.top = y
     surf.blit(text_surface, text_rect)
+
+# 數獨建立程式
+def create_sudoku():
+    global Number_Fixed,Number_Player,choose,mistake
+    Number_Fixed = [[0]*9 for i in range(9)]
+    Number_Player = [[0]*9 for i in range(9)]
+    choose = [[False]*9 for i in range(9)]
+    mistake = 0
+
+
 
 # 遊戲主迴圈
 running = True
