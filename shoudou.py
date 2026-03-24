@@ -27,12 +27,25 @@ def draw_text(surf, text, size, x, y,color):
 
 # 數獨建立程式
 def create_sudoku():
-    global Number_Fixed,Number_Player,choose,mistake
+    global Number_Fixed,Number_Display,mistake
     Number_Fixed = [[0]*9 for i in range(9)]
-    Number_Player = [[0]*9 for i in range(9)]
-    choose = [[False]*9 for i in range(9)]
+    Number_Display = [[0]*9 for i in range(9)]
     mistake = 0
 
+# 數獨規則
+def sudoku_detect(x,y,num):
+    for i in range(9):
+        if Number_Display[x][i] == num:
+            return False
+        if Number_Display[i][y] == num:
+            return False
+    box_x = x // 3
+    box_y = y // 3  
+    for i in range(box_x * 3, box_x * 3 + 3):
+        for j in range(box_y * 3, box_y * 3 + 3):
+            if Number_Display[i][j] == num:
+                return False 
+    return True
 
 
 # 遊戲主迴圈
