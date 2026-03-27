@@ -47,14 +47,16 @@ def sudoku_detect(x,y,num):
                 return False 
     return True
 
+# 題目建立(目前無法確定每格都有數字)
 def sudoku_create():
-    global Number_Fixed,Number_Display
-    for i in range(9):
-        for j in range(9):
-            num = random.randint(1, 9)
-            if sudoku_detect(i, j, num):
-                Number_Fixed[i][j] = num
-                Number_Display[i][j] = num
+    runing = True
+    while runing:
+        for i in range(9):
+            for j in range(9):
+                num = random.randint(1, 9)
+                if sudoku_detect(i, j, num):
+                    Number_Fixed[i][j] = num
+                    # Number_Display[i][j] = num
 
 # 遊戲主迴圈
 running = True
