@@ -92,13 +92,13 @@ def draw_grid():
     if selected_cell:
         sel_r, sel_c = selected_cell
         
-        # 1. 塗上同列、同行、同九宮格的提示色 (較淺的藍色)
+        # 塗上同列、同行、同九宮格的提示色
         for r in range(9):
             for c in range(9):
                 if r == sel_r or c == sel_c or (r // 3 == sel_r // 3 and c // 3 == sel_c // 3):
                     pygame.draw.rect(screen, HIGHLIGHT_BLUE, (20 + c * 50, 20 + r * 50, 50, 50))
                     
-        # 2. 塗上實際點擊選中格子的顏色 (原本的淺藍色，覆蓋上去作區分)
+        # 塗上實際點擊選中格子的顏色
         pygame.draw.rect(screen, LIGHT_BLUE, (20 + sel_c * 50, 20 + sel_r * 50, 50, 50))
 
     # 繪製格線
@@ -120,7 +120,7 @@ def draw_grid():
 # 遊戲初始化與建立題目
 create_sudoku()
 
-# 遊戲狀態："playing" (遊玩中) 或 "win" (過關)
+# 遊戲狀態："playing" (遊玩中)、"win" (過關) 或 "game_over" (失敗)
 game_state = "playing"
 
 # 遊戲主迴圈
@@ -130,7 +130,7 @@ while running:
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             running = False
             
-        # 處理重啟遊戲快捷鍵
+        # 處理重啟遊戲快捷鍵 (適用於所有狀態)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
             create_sudoku()
             game_state = "playing"
@@ -149,16 +149,23 @@ while running:
             if event.type == pygame.KEYDOWN and selected_cell:
                 r, c = selected_cell
                 if not Number_Fixed[r][c]:
+                    # 處理填入數字
+                    num_input = None
                     if pygame.K_1 <= event.key <= pygame.K_9:
-                        num = event.key - pygame.K_0
-                        Number_Display[r][c] = num
-                        if num != Answer_Grid[r][c]:
-                            mistake += 1
+                        num_input = event.key - pygame.K_0
                     elif pygame.K_KP1 <= event.key <= pygame.K_KP9:
-                        num = event.key - pygame.K_KP1 + 1
-                        Number_Display[r][c] = num
-                        if num != Answer_Grid[r][c]:
+                        num_input = event.key - pygame.K_KP1 + 1
+                    
+                    if num_input is not None:
+                        Number_Display[r][c] = num_input
+                        # 如果填錯，增加錯誤次數
+                        if num_input != Answer_Grid[r][c]:
                             mistake += 1
+                            # 檢查是否達到 3 次錯誤上限
+                            if mistake >= 3:
+                                game_state = "game_over"
+                                
+                    # 處理刪除
                     elif event.key == pygame.K_BACKSPACE or event.key == pygame.K_DELETE:
                         Number_Display[r][c] = 0
 
@@ -168,7 +175,8 @@ while running:
     if game_state == "playing":
         # 遊玩中：繪製網格與提示文字
         draw_grid()
-        draw_text(screen, f"Mistakes: {mistake}", 30, WIDTH // 2, 490, RED if mistake > 0 else BLACK)
+        # 顯示 X / 3 的錯誤次數
+        draw_text(screen, f"Mistakes: {mistake} / 3", 30, WIDTH // 2, 490, RED if mistake > 0 else BLACK)
         draw_text(screen, "Click to select a cell, type 1-9 to play", 20, WIDTH // 2, 530, BLACK)
         draw_text(screen, "Press ESC to exit | Press R to restart", 18, WIDTH // 2, 560, BLACK)
         
@@ -189,6 +197,11 @@ while running:
         # 過關畫面
         draw_text(screen, "YOU WIN!", 80, WIDTH // 2, HEIGHT // 2 - 50, BLUE)
         draw_text(screen, "Press 'R' to play again", 30, WIDTH // 2, HEIGHT // 2 + 50, BLACK)
+
+    elif game_state == "game_over":
+        # 遊戲失敗畫面
+        draw_text(screen, "GAME OVER", 80, WIDTH // 2, HEIGHT // 2 - 50, RED)
+        draw_text(screen, "Press 'R' to try again", 30, WIDTH // 2, HEIGHT // 2 + 50, BLACK)
     
     # 更新畫面
     pygame.display.update()
