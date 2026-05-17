@@ -11,7 +11,8 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
-LIGHT_BLUE = (173, 216, 230) # 選取格子的背景色
+LIGHT_BLUE = (173, 216, 230)      # 實際選取格子的背景色
+HIGHLIGHT_BLUE = (220, 240, 255)  # 同列、同行、同九宮格的提示背景色
 
 # 遊戲初始化
 pygame.init()
@@ -87,15 +88,26 @@ def create_sudoku():
 
 # 繪製畫面邏輯
 def draw_grid():
+    # 繪製選取與提示的背景色
     if selected_cell:
-        r, c = selected_cell
-        pygame.draw.rect(screen, LIGHT_BLUE, (20 + c * 50, 20 + r * 50, 50, 50))
+        sel_r, sel_c = selected_cell
+        
+        # 1. 塗上同列、同行、同九宮格的提示色 (較淺的藍色)
+        for r in range(9):
+            for c in range(9):
+                if r == sel_r or c == sel_c or (r // 3 == sel_r // 3 and c // 3 == sel_c // 3):
+                    pygame.draw.rect(screen, HIGHLIGHT_BLUE, (20 + c * 50, 20 + r * 50, 50, 50))
+                    
+        # 2. 塗上實際點擊選中格子的顏色 (原本的淺藍色，覆蓋上去作區分)
+        pygame.draw.rect(screen, LIGHT_BLUE, (20 + sel_c * 50, 20 + sel_r * 50, 50, 50))
 
+    # 繪製格線
     for i in range(10):
         thickness = 3 if i % 3 == 0 else 1
         pygame.draw.line(screen, BLACK, (20, 20 + i * 50), (470, 20 + i * 50), thickness)
         pygame.draw.line(screen, BLACK, (20 + i * 50, 20), (20 + i * 50, 470), thickness)
         
+    # 繪製數字
     for r in range(9):
         for c in range(9):
             num = Number_Display[r][c]
@@ -108,7 +120,7 @@ def draw_grid():
 # 遊戲初始化與建立題目
 create_sudoku()
 
-# 新增遊戲狀態："playing" (遊玩中) 或 "win" (過關)
+# 遊戲狀態："playing" (遊玩中) 或 "win" (過關)
 game_state = "playing"
 
 # 遊戲主迴圈
@@ -118,10 +130,10 @@ while running:
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             running = False
             
-        # 處理重啟遊戲快捷鍵 (無論在遊玩中還是勝利畫面都可以按 R 重啟)
+        # 處理重啟遊戲快捷鍵
         if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
             create_sudoku()
-            game_state = "playing" # 將狀態改回遊玩中
+            game_state = "playing"
             
         # 只有在 "playing" 狀態下才處理滑鼠點擊與填寫數字
         if game_state == "playing":
@@ -150,7 +162,7 @@ while running:
                     elif event.key == pygame.K_BACKSPACE or event.key == pygame.K_DELETE:
                         Number_Display[r][c] = 0
 
-    # 統一將背景塗白
+    # 背景塗白
     screen.fill(WHITE)
     
     if game_state == "playing":
@@ -170,11 +182,11 @@ while running:
             if not is_win:
                 break
         
-        if is_win: # 若過關，切換遊戲狀態
+        if is_win:
             game_state = "win"
             
     elif game_state == "win":
-        # 過關畫面：只顯示文字在白底上
+        # 過關畫面
         draw_text(screen, "YOU WIN!", 80, WIDTH // 2, HEIGHT // 2 - 50, BLUE)
         draw_text(screen, "Press 'R' to play again", 30, WIDTH // 2, HEIGHT // 2 + 50, BLACK)
     
