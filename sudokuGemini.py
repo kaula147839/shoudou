@@ -13,6 +13,7 @@ BLUE = (0, 0, 255)
 RED = (255, 0, 0)
 LIGHT_BLUE = (173, 216, 230)      # 實際選取格子的背景色
 HIGHLIGHT_BLUE = (220, 240, 255)  # 同列、同行、同九宮格的提示背景色
+SAME_NUM_COLOR = (255, 255, 150)  # 相同數字的提示背景色 (淺黃色)
 
 # 遊戲初始化
 pygame.init()
@@ -91,14 +92,22 @@ def draw_grid():
     # 繪製選取與提示的背景色
     if selected_cell:
         sel_r, sel_c = selected_cell
+        selected_num = Number_Display[sel_r][sel_c]
         
-        # 塗上同列、同行、同九宮格的提示色
+        # 1. 塗上同列、同行、同九宮格的提示色 (淺藍色)
         for r in range(9):
             for c in range(9):
                 if r == sel_r or c == sel_c or (r // 3 == sel_r // 3 and c // 3 == sel_c // 3):
                     pygame.draw.rect(screen, HIGHLIGHT_BLUE, (20 + c * 50, 20 + r * 50, 50, 50))
                     
-        # 塗上實際點擊選中格子的顏色
+        # 2. 如果選取的格子裡面有數字，則在全盤找出一樣的數字並塗上特殊色 (淺黃色)
+        if selected_num != 0:
+            for r in range(9):
+                for c in range(9):
+                    if Number_Display[r][c] == selected_num and (r, c) != (sel_r, sel_c):
+                        pygame.draw.rect(screen, SAME_NUM_COLOR, (20 + c * 50, 20 + r * 50, 50, 50))
+                        
+        # 3. 塗上實際點擊選中格子的顏色 (稍微深一點的淺藍色，覆蓋在最上層)
         pygame.draw.rect(screen, LIGHT_BLUE, (20 + sel_c * 50, 20 + sel_r * 50, 50, 50))
 
     # 繪製格線
